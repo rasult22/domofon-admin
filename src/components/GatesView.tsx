@@ -100,7 +100,6 @@ const GatesView: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Калитки и Шлагбаумы</h1>
-          <p className="text-gray-600">{complex.name}</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           Всего: {gates?.length || 0}
