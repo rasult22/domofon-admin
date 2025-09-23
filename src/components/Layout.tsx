@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from './ui/button';
 import { 
-  Home, 
   Users, 
   Building, 
   DoorOpen, 
-  BarChart3, 
   LogOut, 
   Menu, 
   X 
@@ -23,11 +21,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: Home },
-    { name: 'Residents', href: '/residents', icon: Users },
-    { name: 'Apartments', href: '/apartments', icon: Building },
-    { name: 'Gates & Barriers', href: '/gates', icon: DoorOpen },
-    { name: 'Statistics', href: '/statistics', icon: BarChart3 },
+    { name: 'Жители', href: '/home', icon: Users },
+    { name: 'Квартиры', href: '/apartments', icon: Building },
+    { name: 'Калитки & Шлагбаумы', href: '/gates', icon: DoorOpen },
   ];
 
   const handleLogout = () => {

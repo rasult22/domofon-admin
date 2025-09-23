@@ -12,7 +12,6 @@ import {
   DoorOpen, 
   Shield, 
   Users, 
-  Settings,
   UserCheck,
   UserX,
   Clock,
@@ -134,11 +133,6 @@ const GateManagement: React.FC = () => {
     return permissions.filter(p => p.gate_id === gateId);
   };
 
-  const handleAddGate = () => {
-    setEditingGate(null);
-    setShowAddModal(true);
-  };
-
   const handleEditGate = (gate: Gate) => {
     setEditingGate(gate);
     setShowAddModal(true);
@@ -200,10 +194,7 @@ const GateManagement: React.FC = () => {
             Manage access points and permissions in {complex?.name || 'your complex'}
           </p>
         </div>
-        <Button onClick={handleAddGate} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Add Gate/Barrier
-        </Button>
+
       </div>
 
       {/* Search and Filters */}
@@ -301,12 +292,6 @@ const GateManagement: React.FC = () => {
               <p className="text-gray-500 mb-4">
                 {searchTerm ? 'Try adjusting your search terms.' : 'Get started by adding your first gate or barrier.'}
               </p>
-              {!searchTerm && (
-                <Button onClick={handleAddGate}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add First Gate/Barrier
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>

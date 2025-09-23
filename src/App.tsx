@@ -4,11 +4,9 @@ import queryClient from './queries/client';
 import { AuthProvider } from './contexts/AuthContext';
 import Login from './components/Login';
 import ProtectedRoute from './components/ProtectedRoute';
-import { HomeScreen } from './screens/HomeScreen';
 import ResidentsScreen from './screens/ResidentsScreen';
 import ApartmentsScreen from './screens/ApartmentsScreen';
 import GatesScreen from './screens/GatesScreen';
-import StatisticsScreen from './screens/StatisticsScreen';
 import { NotFound } from './screens/NotFound';
 
 function App() {
@@ -18,12 +16,8 @@ function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <HomeScreen />
-              </ProtectedRoute>
-            } />
-            <Route path="/residents" element={
+           
+            <Route path="/home" element={
               <ProtectedRoute>
                 <ResidentsScreen />
               </ProtectedRoute>
@@ -38,12 +32,7 @@ function App() {
                 <GatesScreen />
               </ProtectedRoute>
             } />
-            <Route path="/statistics" element={
-              <ProtectedRoute>
-                <StatisticsScreen />
-              </ProtectedRoute>
-            } />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
