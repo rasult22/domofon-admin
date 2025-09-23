@@ -49,7 +49,7 @@ const ResidentsView: React.FC = () => {
   }
 
   // Фильтруем только заселенные квартиры
-  const residentsData = apartments?.filter(apt => apt.expand?.user) || [];
+  const residentsData = apartments?.filter(apt => apt.user_id !== '') || [];
 
   return (
     <div className="space-y-6">
@@ -75,7 +75,12 @@ const ResidentsView: React.FC = () => {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {residentsData.map((apartment) => {
-            const resident = apartment.expand?.user;
+            const resident = {
+              id: apartment.user_id,
+              name: apartment.user_name,
+              username: apartment.user_email,
+              email: apartment.user_email,
+            };
             if (!resident) return null;
 
             return (

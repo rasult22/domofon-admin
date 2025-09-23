@@ -22,14 +22,13 @@ interface Apartment {
 // Query для получения квартир с жильцами (для ResidentsView)
 export const useApartmentsWithResidents = (complexId?: string) => {
   return useQuery({
-    queryKey: ['apartments', complexId],
+    queryKey: ['apartments_list', complexId],
     queryFn: async () => {
       if (!complexId) return [];
-      const records = await pb.collection('apartments').getFullList({
+      const records = await pb.collection('apartment_list').getFullList({
         filter: `complex_id = "${complexId}"`,
-        expand: 'user'
       });
-      return records as (Apartment & { expand?: { user: Resident } })[];
+      return records as (Apartment & {user_id: string, user_name: string, user_email: string})[];
     },
     enabled: !!complexId
   });
@@ -41,12 +40,11 @@ export const useApartments = (complexId?: string) => {
     queryKey: ['apartments', complexId],
     queryFn: async () => {
       if (!complexId) return [];
-      const records = await pb.collection('apartments').getFullList({
+      const records = await pb.collection('apartment_list').getFullList({
         filter: `complex_id = "${complexId}"`,
-        expand: 'user',
         sort: '+apartment_number'
       });
-      return records as Apartment[];
+      return records as (Apartment & {user_id: string, user_name: string, user_email: string})[];
     },
     enabled: !!complexId
   });

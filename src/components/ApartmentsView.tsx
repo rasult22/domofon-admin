@@ -82,7 +82,7 @@ const ApartmentsView: React.FC = () => {
             <Card 
               key={apartment.id} 
               className={`hover:shadow-md transition-shadow ${
-                apartment.user ? 'border-green-200 bg-green-50' : 'border-gray-200'
+                apartment.user_id ? 'border-green-200 bg-green-50' : 'border-gray-200'
               }`}
             >
               <CardHeader className="pb-3">
@@ -92,10 +92,10 @@ const ApartmentsView: React.FC = () => {
                     Кв. {apartment.apartment_number}
                   </div>
                   <Badge 
-                    variant={apartment.user ? "default" : "outline"}
+                    variant={apartment.user_id ? "default" : "outline"}
                     className="text-xs"
                   >
-                    {apartment.user ? "Заселена" : "Свободна"}
+                    {apartment.user_id ? "Заселена" : "Свободна"}
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -109,11 +109,11 @@ const ApartmentsView: React.FC = () => {
                   </div>
                 )}
                 
-                {apartment.expand?.user ? (
+                {apartment.user_id ? (
                   <div className="flex items-center gap-2 text-sm text-gray-700">
                     <User className="h-4 w-4" />
                     <span className="font-medium">
-                      {apartment.expand.user.name || apartment.expand.user.username}
+                      {apartment.user_name || apartment.user_email}
                     </span>
                   </div>
                 ) : (
