@@ -1,7 +1,6 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { pb } from '../queries/client';
+import { useGates, useGatePermissions } from '../queries/gates';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
@@ -37,33 +36,8 @@ interface GatePermission {
 const GatesView: React.FC = () => {
   const { complex } = useAuth();
 
-  const { data: gates, isLoading: gatesLoading } = useQuery({
-    queryKey: ['gates', complex?.id],
-    queryFn: async () => {
-      if (!complex?.id) return [];
-      const records = await pb.collection('gates').getFullList({
-        filter: `complex_id = "${complex.id}"`,
-        expand: 'gates_call_info_via_gate_id',
-        sort: '+name'
-      });
-      return records as Gate[];
-    },
-    enabled: !!complex?.id
-  });
-
-  const { data: permissions, isLoading: permissionsLoading } = useQuery({
-    queryKey: ['gate_permissions', complex?.id],
-    queryFn: async () => {
-      if (!complex?.id) return [];
-      const records = await pb.collection('gates_user_permissions').getFullList({
-        filter: `complex_id = "${complex.id}"`,
-        expand: 'user_id',
-        sort: '+user_id'
-      });
-      return records as GatePermission[];
-    },
-    enabled: !!complex?.id
-  });
+  const { data: gates, isLoading: gatesLoading } = useGates(complex?.id);
+  const { data: permissions, isLoading: permissionsLoading } = useGatePermissions(complex?.id);
 
   const isLoading = gatesLoading || permissionsLoading;
 

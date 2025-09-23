@@ -1,7 +1,6 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext';
-import { pb } from '../queries/client';
+import { useApartments } from '../queries/apartments';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Home, User, Key, Hash } from 'lucide-react';
@@ -27,19 +26,7 @@ interface Apartment {
 const ApartmentsView: React.FC = () => {
   const { complex } = useAuth();
 
-  const { data: apartments, isLoading } = useQuery({
-    queryKey: ['apartments', complex?.id],
-    queryFn: async () => {
-      if (!complex?.id) return [];
-      const records = await pb.collection('apartments').getFullList({
-        filter: `complex_id = "${complex.id}"`,
-        expand: 'user',
-        sort: '+apartment_number'
-      });
-      return records as Apartment[];
-    },
-    enabled: !!complex?.id
-  });
+  const { data: apartments, isLoading } = useApartments(complex?.id);
 
   if (isLoading) {
     return (
