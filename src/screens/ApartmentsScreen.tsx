@@ -1,11 +1,11 @@
 import React from 'react';
 import Layout from '../components/Layout';
-import ApartmentManagement from '../components/ApartmentManagement';
+import ApartmentsView from '../components/ApartmentsView';
 
 const ApartmentsScreen: React.FC = () => {
   return (
     <Layout>
-      <ApartmentManagement />
+      <ApartmentsView />
     </Layout>
   );
 };

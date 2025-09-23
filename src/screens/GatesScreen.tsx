@@ -1,13 +1,11 @@
 import React from 'react';
 import Layout from '../components/Layout';
-import GateManagement from '../components/GateManagement';
+import GatesView from '../components/GatesView';
 
 const GatesScreen: React.FC = () => {
   return (
     <Layout>
-      <div className="p-6">
-        <GateManagement />
-      </div>
+      <GatesView />
     </Layout>
   );
 };
