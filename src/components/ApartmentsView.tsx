@@ -15,25 +15,6 @@ const ApartmentsView: React.FC = () => {
 
   const { data: apartments, isLoading } = useApartments(complex?.id);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Загрузка квартир...</div>
-      </div>
-    );
-  }
-
-  if (!complex) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-500">ЖК не выбран</div>
-      </div>
-    );
-  }
-
-  const occupiedApartments = apartments?.filter(apt => apt.user_id) || [];
-  const vacantApartments = apartments?.filter(apt => !apt.user_id) || [];
-
   const filteredAndSortedApartments = useMemo(() => {
     if (!apartments) return [];
 
@@ -78,6 +59,27 @@ const ApartmentsView: React.FC = () => {
       return 0;
     });
   }, [apartments, searchTerm, sortField, sortDirection]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg">Загрузка квартир...</div>
+      </div>
+    );
+  }
+
+  if (!complex) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-500">ЖК не выбран</div>
+      </div>
+    );
+  }
+
+  const occupiedApartments = apartments?.filter(apt => apt.user_id) || [];
+  const vacantApartments = apartments?.filter(apt => !apt.user_id) || [];
+
+
 
   const handleSort = (field: 'apartment_number' | 'user_name' | 'status') => {
     if (sortField === field) {

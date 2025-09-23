@@ -31,32 +31,14 @@ const ResidentsView: React.FC = () => {
   // Получаем квартиры текущего ЖК
   const { data: apartments, isLoading: apartmentsLoading } = useApartmentsWithResidents(complex?.id);
 
-  if (apartmentsLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-          <p className="text-gray-600">Загрузка жильцов...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!complex) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-gray-600">Выберите жилой комплекс</p>
-      </div>
-    );
-  }
-
-  // Фильтруем только заселенные квартиры
-  const residentsData = apartments?.filter(apt => apt.user_id !== '') || [];
-
+  // All hooks must be called before any early returns
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<'name' | 'apartment_number' | 'email'>('apartment_number');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+
+  // Фильтруем только заселенные квартиры
+  const residentsData = apartments?.filter(apt => apt.user_id !== '') || [];
 
   const filteredAndSortedResidents = useMemo(() => {
     let filtered = residentsData.filter(apartment => {
@@ -97,6 +79,27 @@ const ResidentsView: React.FC = () => {
       return sortDirection === 'asc' ? comparison : -comparison;
     });
   }, [residentsData, searchTerm, sortField, sortDirection]);
+
+  if (apartmentsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Загрузка жильцов...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!complex) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Выберите жилой комплекс</p>
+      </div>
+    );
+  }
+
+
 
   const handleSort = (field: 'name' | 'apartment_number' | 'email') => {
     if (sortField === field) {
