@@ -6,33 +6,6 @@ import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
 import { DoorOpen, Car, Users, Phone, User } from 'lucide-react';
 
-interface Gate {
-  id: string;
-  type: string;
-  name: string;
-  complex_id: string;
-  expand?: {
-    gates_call_info_via_gate_id?: {
-      sim_number: string;
-    }[];
-  };
-}
-
-interface GatePermission {
-  id: string;
-  gate_ids: string[];
-  user_id: string;
-  complex_id: string;
-  expand?: {
-    user_id?: {
-      id: string;
-      name: string;
-      email: string;
-      username: string;
-    };
-  };
-}
-
 const GatesView: React.FC = () => {
   const { complex } = useAuth();
 
@@ -76,7 +49,7 @@ const GatesView: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Калитки и Шлагбаумы</h1>
-          <p className="text-gray-600">ЖК: {complex.name}</p>
+          <p className="text-gray-600">{complex.name}</p>
         </div>
         <Badge variant="secondary" className="text-lg px-4 py-2">
           Всего: {gates?.length || 0}
@@ -97,7 +70,6 @@ const GatesView: React.FC = () => {
           {gates.map((gate) => {
             const Icon = getGateIcon(gate.type);
             const usersWithAccess = getUsersForGate(gate.id);
-            const callInfo = gate.expand?.gates_call_info_via_gate_id?.[0];
 
             return (
               <Card key={gate.id} className="hover:shadow-md transition-shadow">
@@ -115,15 +87,7 @@ const GatesView: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {callInfo && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Phone className="h-4 w-4" />
-                      <span>Номер устройства: {callInfo.sim_number}</span>
-                    </div>
-                  )}
-
                   <Separator />
-
                   <div>
                     <div className="flex items-center gap-2 mb-3">
                       <Users className="h-4 w-4" />
@@ -145,8 +109,8 @@ const GatesView: React.FC = () => {
                           >
                             <User className="h-3 w-3 text-gray-400" />
                             <span>
-                              {permission.expand?.user_id?.name || 
-                               permission.expand?.user_id?.username || 
+                              {permission.user_name || 
+                               permission.user_email || 
                                'Неизвестный пользователь'}
                             </span>
                           </div>

@@ -5,24 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Home, User, Key, Hash } from 'lucide-react';
 
-interface Resident {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-}
-
-interface Apartment {
-  id: string;
-  apartment_number: string;
-  apartment_code: string;
-  user: string;
-  complex_id: string;
-  expand?: {
-    user?: Resident;
-  };
-}
-
 const ApartmentsView: React.FC = () => {
   const { complex } = useAuth();
 
@@ -44,15 +26,15 @@ const ApartmentsView: React.FC = () => {
     );
   }
 
-  const occupiedApartments = apartments?.filter(apt => apt.user) || [];
-  const vacantApartments = apartments?.filter(apt => !apt.user) || [];
+  const occupiedApartments = apartments?.filter(apt => apt.user_id) || [];
+  const vacantApartments = apartments?.filter(apt => !apt.user_id) || [];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Квартиры</h1>
-          <p className="text-gray-600">ЖК: {complex.name}</p>
+          <p className="text-gray-600">{complex.name}</p>
         </div>
         <div className="flex gap-2">
           <Badge variant="default" className="text-sm px-3 py-1">

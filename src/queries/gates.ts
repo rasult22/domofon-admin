@@ -6,26 +6,15 @@ interface Gate {
   type: string;
   name: string;
   complex_id: string;
-  expand?: {
-    gates_call_info_via_gate_id?: {
-      sim_number: string;
-    }[];
-  };
 }
 
 interface GatePermission {
   id: string;
   gate_ids: string[];
   user_id: string;
+  user_name: string;
+  user_email: string;
   complex_id: string;
-  expand?: {
-    user_id?: {
-      id: string;
-      name: string;
-      email: string;
-      username: string;
-    };
-  };
 }
 
 // Query для получения ворот
@@ -36,7 +25,6 @@ export const useGates = (complexId?: string) => {
       if (!complexId) return [];
       const records = await pb.collection('gates').getFullList({
         filter: `complex_id = "${complexId}"`,
-        expand: 'gates_call_info_via_gate_id',
         sort: '+name'
       });
       return records as Gate[];
@@ -51,9 +39,8 @@ export const useGatePermissions = (complexId?: string) => {
     queryKey: ['gate_permissions', complexId],
     queryFn: async () => {
       if (!complexId) return [];
-      const records = await pb.collection('gates_user_permissions').getFullList({
+      const records = await pb.collection('gates_user_permissions_view').getFullList({
         filter: `complex_id = "${complexId}"`,
-        expand: 'user_id',
         sort: '+user_id'
       });
       return records as GatePermission[];

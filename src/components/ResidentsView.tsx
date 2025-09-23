@@ -56,7 +56,7 @@ const ResidentsView: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Жильцы</h1>
-          <p className="text-gray-600">ЖК: {complex.name}</p>
+          <p className="text-gray-600">{complex.name}</p>
         </div>
         <Badge variant="default" className="text-sm px-3 py-1">
           Всего жильцов: {residentsData.length}
