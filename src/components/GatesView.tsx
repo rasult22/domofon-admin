@@ -1,18 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useGates, useGatePermissions } from '../queries/gates';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useResidents } from '../queries/apartments';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
-import { DoorOpen, Car, Users, Phone, User } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { 
+  DoorOpen, 
+  Car, 
+  Users, 
+  User, 
+  Plus, 
+  Search, 
+  UserX 
+} from 'lucide-react';
+
+// Используем интерфейс GatePermission из queries/gates.ts
+interface GatePermission {
+  id: string;
+  gate_ids: string[];
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  complex_id: string;
+}
 
 const GatesView: React.FC = () => {
   const { complex } = useAuth();
+  const [selectedGate, setSelectedGate] = useState<any>(null);
+  const [showPermissionsModal, setShowPermissionsModal] = useState(false);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
 
   const { data: gates, isLoading: gatesLoading } = useGates(complex?.id);
   const { data: permissions, isLoading: permissionsLoading } = useGatePermissions(complex?.id);
+  const { data: residents, isLoading: residentsLoading } = useResidents(complex?.id);
 
-  const isLoading = gatesLoading || permissionsLoading;
+  const isLoading = gatesLoading || permissionsLoading || residentsLoading;
+
+  // Используем реальные данные из API
 
   if (isLoading) {
     return (
@@ -43,6 +70,30 @@ const GatesView: React.FC = () => {
       perm.gate_ids.includes(gateId)
     ) || [];
   };
+
+  const getGatePermissions = (gateId: string) => {
+    return permissions?.filter(p => p.gate_ids.includes(gateId)) || [];
+  };
+
+  const handleManagePermissions = (gate: any) => {
+    setSelectedGate(gate);
+    setShowPermissionsModal(true);
+  };
+
+  // Получаем всех резидентов с информацией о доступе к выбранному заграждению
+  const filteredResidents = selectedGate && residents ? 
+    residents.filter(resident =>
+      resident.user_name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+      resident.user_email.toLowerCase().includes(userSearchTerm.toLowerCase())
+    ).map(resident => {
+      const hasAccess = permissions?.some(perm => 
+        perm.user_id === resident.user_id && perm.gate_ids.includes(selectedGate.id)
+      );
+      return {
+        ...resident,
+        hasAccess
+      };
+    }) : [];
 
   return (
     <div className="space-y-6">
@@ -89,11 +140,21 @@ const GatesView: React.FC = () => {
                 <CardContent className="space-y-4">
                   <Separator />
                   <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Users className="h-4 w-4" />
-                      <span className="font-medium text-sm">
-                        Доступы ({usersWithAccess.length})
-                      </span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4" />
+                        <span className="font-medium text-sm">
+                          Доступы ({usersWithAccess.length})
+                        </span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleManagePermissions(gate)}
+                        className="text-xs"
+                      >
+                        Управление
+                      </Button>
                     </div>
 
                     {usersWithAccess.length === 0 ? (
@@ -122,6 +183,86 @@ const GatesView: React.FC = () => {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Permissions Modal */}
+      {showPermissionsModal && selectedGate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-4xl max-h-[80vh] overflow-hidden">
+            <CardHeader>
+              <CardTitle>Управление доступами - {selectedGate.name}</CardTitle>
+              <CardDescription>
+                Просмотр и управление доступами для этого заграждения
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-y-auto">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="text-sm text-gray-600">
+                    {residents?.length || 0} резидентов • {getGatePermissions(selectedGate.id).length} с доступом
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Поиск по пользователям..."
+                        value={userSearchTerm}
+                        onChange={(e) => setUserSearchTerm(e.target.value)}
+                        className="pl-10 w-64"
+                      />
+                    </div>
+
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  {filteredResidents.map((resident) => (
+                    <div key={resident.user_id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-medium">{resident.user_name}</span>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            resident.hasAccess 
+                              ? 'text-green-600 bg-green-100' 
+                              : 'text-gray-600 bg-gray-100'
+                          }`}>
+                            {resident.hasAccess ? 'Есть доступ' : 'Нет доступа'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          <span>{resident.user_email}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {resident.hasAccess ? (
+                          <Button variant="outline" size="sm" className="text-red-600">
+                            <UserX className="h-3 w-3 mr-1" />
+                            Убрать доступ
+                          </Button>
+                        ) : (
+                          <Button variant="outline" size="sm" className="text-green-600">
+                            <Plus className="h-3 w-3 mr-1" />
+                            Дать доступ
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  {filteredResidents.length === 0 && (
+                    <div className="text-center py-8 text-gray-500">
+                      {userSearchTerm ? 'Резиденты не найдены' : 'Нет резидентов в ЖК'}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-end mt-6">
+                <Button onClick={() => setShowPermissionsModal(false)}>
+                  Закрыть
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>
