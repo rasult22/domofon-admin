@@ -23,3 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 .vscode
+pb_schema.json
+domofon_project_overview.md
