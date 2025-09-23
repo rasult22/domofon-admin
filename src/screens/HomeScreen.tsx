@@ -1,9 +1,10 @@
+import Layout from '../components/Layout';
+import Dashboard from '../components/Dashboard';
+
 export const HomeScreen = () => {
-
-
   return (
-    <div>
-      Home Screen
-    </div>
+    <Layout>
+      <Dashboard />
+    </Layout>
   );
 };
