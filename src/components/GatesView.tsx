@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useGates, useGatePermissions } from '../queries/gates';
-import { useResidents } from '../queries/apartments';
+import { useGates, useGatePermissions, Gate, GatePermission } from '../queries/gates';
+import { Resident, useResidents } from '../queries/apartments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Separator } from './ui/separator';
@@ -16,25 +16,16 @@ import {
   Search, 
   UserX 
 } from 'lucide-react';
-
-// Используем интерфейс GatePermission из queries/gates.ts
-interface GatePermission {
-  id: string;
-  gate_ids: string[];
-  user_id: string;
-  user_name: string;
-  user_email: string;
-  complex_id: string;
-}
+import { pb } from '@/queries';
 
 const GatesView: React.FC = () => {
   const { complex } = useAuth();
-  const [selectedGate, setSelectedGate] = useState<any>(null);
+  const [selectedGate, setSelectedGate] = useState<Gate>();
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
 
   const { data: gates, isLoading: gatesLoading } = useGates(complex?.id);
-  const { data: permissions, isLoading: permissionsLoading } = useGatePermissions(complex?.id);
+  const { data: permissions, isLoading: permissionsLoading, refetch: refetchPermissions } = useGatePermissions(complex?.id);
   const { data: residents, isLoading: residentsLoading } = useResidents(complex?.id);
 
   const isLoading = gatesLoading || permissionsLoading || residentsLoading;
@@ -56,6 +47,36 @@ const GatesView: React.FC = () => {
       </div>
     );
   }
+  const grantAccess = async (resident: Resident, gate: Gate) => {
+    // check if user have gates_user_permissions record specified with his id
+    try {
+      const user_permission = await pb.collection('gates_user_permissions').getFirstListItem<GatePermission>(`user_id="${resident.user_id}"`);
+      console.log('User permission found:', user_permission);
+      // Handle case when permission exists
+      const gate_id = [...user_permission.gate_ids, gate.id];
+
+      await pb.collection('gates_user_permissions').update(user_permission.id, {
+        gate_ids: gate_id
+      });
+      await refetchPermissions()
+    } catch (error: any) {
+      if (error.status === 404) {
+        console.log('No permission record found for user - this is expected for new users');
+        // Handle case when no permission exists (create new permission, etc.)
+        await pb.collection('gates_user_permissions').create({
+          gate_ids: [gate.id],
+          user_id: resident.user_id,
+          user_name: resident.user_name,
+          user_email: resident.user_email,
+          complex_id: complex.id
+        });
+        await refetchPermissions()
+      } else {
+        console.log('Error granting access:', error);
+        // Handle other errors
+      }
+    }
+  }
 
   const getGateIcon = (type: string) => {
     return type === 'BARRIER' ? Car : DoorOpen;
@@ -75,7 +96,7 @@ const GatesView: React.FC = () => {
     return permissions?.filter(p => p.gate_ids.includes(gateId)) || [];
   };
 
-  const handleManagePermissions = (gate: any) => {
+  const handleManagePermissions = (gate: Gate) => {
     setSelectedGate(gate);
     setShowPermissionsModal(true);
   };
@@ -240,7 +261,7 @@ const GatesView: React.FC = () => {
                             Убрать доступ
                           </Button>
                         ) : (
-                          <Button variant="outline" size="sm" className="text-green-600">
+                          <Button onClick={() => grantAccess(resident, selectedGate)} variant="outline" size="sm" className="text-green-600">
                             <Plus className="h-3 w-3 mr-1" />
                             Дать доступ
                           </Button>

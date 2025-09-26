@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { pb } from './client';
 
-interface Gate {
+export interface Gate {
   id: string;
   type: string;
   name: string;
   complex_id: string;
 }
 
-interface GatePermission {
+export interface GatePermission {
   id: string;
   gate_ids: string[];
   user_id: string;
