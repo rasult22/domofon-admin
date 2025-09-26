@@ -23,6 +23,7 @@ const GatesView: React.FC = () => {
   const [selectedGate, setSelectedGate] = useState<Gate>();
   const [showPermissionsModal, setShowPermissionsModal] = useState(false);
   const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null); // Добавляем состояние для отслеживания загрузки
 
   const { data: gates, isLoading: gatesLoading } = useGates(complex?.id);
   const { data: permissions, isLoading: permissionsLoading, refetch: refetchPermissions } = useGatePermissions(complex?.id);
@@ -48,7 +49,7 @@ const GatesView: React.FC = () => {
     );
   }
   const grantAccess = async (resident: Resident, gate: Gate) => {
-    // check if user have gates_user_permissions record specified with his id
+    setLoadingUserId(resident.user_id); // Устанавливаем loading для конкретного пользователя
     try {
       const user_permission = await pb.collection('gates_user_permissions').getFirstListItem<GatePermission>(`user_id="${resident.user_id}"`);
       console.log('User permission found:', user_permission);
@@ -75,6 +76,8 @@ const GatesView: React.FC = () => {
         console.log('Error granting access:', error);
         // Handle other errors
       }
+    } finally {
+      setLoadingUserId(null); // Сбрасываем loading состояние
     }
   }
 
@@ -261,7 +264,14 @@ const GatesView: React.FC = () => {
                             Убрать доступ
                           </Button>
                         ) : (
-                          <Button onClick={() => grantAccess(resident, selectedGate)} variant="outline" size="sm" className="text-green-600">
+                          <Button 
+                            onClick={() => grantAccess(resident, selectedGate)} 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-green-600"
+                            isLoading={loadingUserId === resident.user_id}
+                            disabled={loadingUserId !== null} // Отключаем все кнопки во время любой операции
+                          >
                             <Plus className="h-3 w-3 mr-1" />
                             Дать доступ
                           </Button>
