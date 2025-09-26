@@ -81,6 +81,33 @@ const GatesView: React.FC = () => {
     }
   }
 
+  const revokeAccess = async (resident: Resident, gate: Gate) => {
+    setLoadingUserId(resident.user_id); // Устанавливаем loading для конкретного пользователя
+    try {
+      const user_permission = await pb.collection('gates_user_permissions').getFirstListItem<GatePermission>(`user_id="${resident.user_id}"`);
+      console.log('User permission found:', user_permission);
+      
+      // Убираем gate.id из массива gate_ids
+      const updated_gate_ids = user_permission.gate_ids.filter(id => id !== gate.id);
+      
+      if (updated_gate_ids.length === 0) {
+        // Если больше нет доступов к воротам, удаляем запись полностью
+        await pb.collection('gates_user_permissions').delete(user_permission.id);
+      } else {
+        // Иначе обновляем запись с новым списком ворот
+        await pb.collection('gates_user_permissions').update(user_permission.id, {
+          gate_ids: updated_gate_ids
+        });
+      }
+      
+      await refetchPermissions();
+    } catch (error: any) {
+      console.log('Error revoking access:', error);
+    } finally {
+      setLoadingUserId(null); // Сбрасываем loading состояние
+    }
+  }
+
   const getGateIcon = (type: string) => {
     return type === 'BARRIER' ? Car : DoorOpen;
   };
@@ -259,7 +286,14 @@ const GatesView: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1">
                         {resident.hasAccess ? (
-                          <Button variant="outline" size="sm" className="text-red-600">
+                          <Button 
+                            onClick={() => revokeAccess(resident, selectedGate)}
+                            variant="outline" 
+                            size="sm" 
+                            className="text-red-600"
+                            isLoading={loadingUserId === resident.user_id}
+                            disabled={loadingUserId !== null} // Отключаем все кнопки во время любой операции
+                          >
                             <UserX className="h-3 w-3 mr-1" />
                             Убрать доступ
                           </Button>
